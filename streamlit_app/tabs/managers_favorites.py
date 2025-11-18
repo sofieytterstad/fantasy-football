@@ -279,7 +279,7 @@ def _render_manager_detail(client, managers_df, betting_filtered, players_dict, 
                 "Total Points": "{:.0f}",
                 "Avg Pts/Player": "{:.2f}",
                 "Success Rate %": "{:.1f}"
-            }).background_gradient(subset=["Total Points"], cmap="Greens"),
+            }),
             use_container_width=True,
             height=400
         )

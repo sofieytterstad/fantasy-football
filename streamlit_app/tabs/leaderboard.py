@@ -57,7 +57,7 @@ def render(managers_df):
             "Consistency": "{:.1f}",
             "Avg PPW": "{:.1f}",
             "Transfers": "{:.0f}"
-        }).background_gradient(subset=["Points"], cmap="Greens"),
+        }),
         use_container_width=True,
         height=400
     )

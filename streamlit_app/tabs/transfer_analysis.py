@@ -125,7 +125,7 @@ def render(client, managers_df, fetch_transfer_data, fetch_players):
                     manager_transfer_stats[["Total", "Success Rate %", "Net Gain"]].style.format({
                         "Success Rate %": "{:.1f}%",
                         "Net Gain": "{:.0f}"
-                    }).background_gradient(subset=["Success Rate %"], cmap="RdYlGn"),
+                    }),
                     height=400
                 )
             
