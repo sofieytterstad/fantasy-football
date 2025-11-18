@@ -141,6 +141,8 @@ celerybeat.pid
 backup*.env
 .envrc
 .venv
+.streamlit/secrets.toml
+DEPLOY_NOW.md
 env/
 venv/
 ENV/
