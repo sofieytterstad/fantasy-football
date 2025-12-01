@@ -1,0 +1,15 @@
+workflowExternalId: fpl_auto_update
+version: "1"
+workflowDefinition:
+  tasks:
+    - externalId: update_fpl_data
+      type: function
+      parameters:
+        function:
+          externalId: fpl_full_update
+        data:
+          league_id: "{{fpl_league_id}}"
+      retries: 2
+      timeout: 1800  # 30 minutes
+      onFailure: abortWorkflow
+

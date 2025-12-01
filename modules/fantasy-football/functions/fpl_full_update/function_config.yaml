@@ -1,0 +1,12 @@
+externalId: fpl_full_update
+name: FPL Full Data Update
+description: Comprehensive Fantasy Premier League data update - loads teams, players, managers, performance, transfers, and team betting patterns to CDF data model instances
+owner: Fantasy Football Team
+runtime: py311
+cpu: 0.5
+memory: 2.0
+envVars:
+  FPL_LEAGUE_ID: "{{fpl_league_id}}"
+metadata:
+  version: "2.0.0"
+

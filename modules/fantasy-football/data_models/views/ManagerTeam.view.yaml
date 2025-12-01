@@ -1,0 +1,84 @@
+space: fantasy_football
+externalId: ManagerTeam
+version: "1"
+name: Manager's Fantasy Team
+description: A manager's selected squad for a specific gameweek
+properties:
+  manager:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: manager
+    source:
+      space: fantasy_football
+      externalId: Manager
+      version: "1"
+      type: view
+  gameweek:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: gameweek
+    source:
+      space: fantasy_football
+      externalId: Gameweek
+      version: "1"
+      type: view
+  captain:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: captain
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
+  viceCaptain:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: viceCaptain
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
+  totalPoints:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: totalPoints
+  teamValue:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: teamValue
+  bank:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: bank
+  activeChip:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: activeChip
+  playerSelections:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: PlayerSelection
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: PlayerSelection
+        version: "1"
+        type: view
+      identifier: managerTeam
+    name: Player Selections
+    description: All 15 player selections in this team
+
+

@@ -1,0 +1,53 @@
+space: fantasy_football
+externalId: PlayerSelection
+version: "1"
+name: Player Selection
+description: Individual player pick in a manager's team
+properties:
+  managerTeam:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: managerTeam
+    source:
+      space: fantasy_football
+      externalId: ManagerTeam
+      version: "1"
+      type: view
+  player:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: player
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
+  position:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: position
+  multiplier:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: multiplier
+  isCaptain:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: isCaptain
+  isViceCaptain:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: isViceCaptain
+  pointsScored:
+    container:
+      space: fantasy_football
+      externalId: PlayerSelection
+    containerPropertyIdentifier: pointsScored
+
+

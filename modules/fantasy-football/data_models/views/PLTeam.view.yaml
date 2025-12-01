@@ -1,0 +1,59 @@
+space: fantasy_football
+externalId: PLTeam
+version: "1"
+name: Premier League Team
+description: Real Premier League football clubs
+properties:
+  teamId:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: teamId
+  name:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: name
+  shortName:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: shortName
+  strength:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strength
+  players:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Player
+        version: "1"
+        type: view
+      identifier: plTeam
+    name: Players
+    description: All players from this Premier League team
+  managerBettingRecords:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerTeamBetting
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerTeamBetting
+        version: "1"
+        type: view
+      identifier: plTeam
+    name: Manager Betting Records
+    description: All manager betting patterns for this Premier League team
+

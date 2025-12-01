@@ -3,11 +3,6 @@ externalId: ManagerGameweekPerformance
 version: "1"
 name: Manager Gameweek Performance
 description: Manager performance per gameweek
-implements:
-  - space: fantasy_football
-    externalId: ManagerGameweekPerformance
-    version: "1"
-    type: container
 properties:
   manager:
     container:

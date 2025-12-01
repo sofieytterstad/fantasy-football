@@ -7,18 +7,17 @@ properties:
   manager:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Manager
+      container:
+        space: fantasy_football
+        externalId: Manager
     nullable: true
     name: Manager
     description: The FPL manager
-  team:
+  plTeam:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Team
     nullable: true
-    name: Team
+    name: Premier League Team
     description: Premier League team
   totalPlayersUsed:
     type:

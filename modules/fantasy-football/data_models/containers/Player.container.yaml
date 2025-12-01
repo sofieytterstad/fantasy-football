@@ -30,13 +30,11 @@ properties:
       list: false
     nullable: true
     name: Last Name
-  team:
+  plTeam:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Team
     nullable: true
-    name: Team
+    name: Premier League Team
     description: Premier League team the player belongs to
   position:
     type:

@@ -3,11 +3,6 @@ externalId: Transfer
 version: "1"
 name: Transfer
 description: Manager transfers with success metrics
-implements:
-  - space: fantasy_football
-    externalId: Transfer
-    version: "1"
-    type: container
 properties:
   manager:
     container:

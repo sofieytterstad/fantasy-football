@@ -3,11 +3,6 @@ externalId: Manager
 version: "1"
 name: Manager
 description: FPL managers in your league
-implements:
-  - space: fantasy_football
-    externalId: Manager
-    version: "1"
-    type: container
 properties:
   entryId:
     container:
@@ -79,4 +74,68 @@ properties:
       space: fantasy_football
       externalId: Manager
     containerPropertyIdentifier: teamValueGrowth
+  gameweekPerformances:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerGameweekPerformance
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerGameweekPerformance
+        version: "1"
+        type: view
+      identifier: manager
+    name: Gameweek Performances
+    description: All gameweek performance records for this manager
+  teamBettingRecords:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerTeamBetting
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerTeamBetting
+        version: "1"
+        type: view
+      identifier: manager
+    name: Team Betting Records
+    description: All team betting records for this manager
+  transfers:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Transfer
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Transfer
+        version: "1"
+        type: view
+      identifier: manager
+    name: Transfers
+    description: All transfers made by this manager
+  managerTeams:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerTeam
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerTeam
+        version: "1"
+        type: view
+      identifier: manager
+    name: Fantasy Teams
+    description: All fantasy teams (squads) this manager has created
 

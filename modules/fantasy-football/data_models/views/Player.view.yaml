@@ -3,11 +3,6 @@ externalId: Player
 version: "1"
 name: Player
 description: FPL players with their stats and performance
-implements:
-  - space: fantasy_football
-    externalId: Player
-    version: "1"
-    type: container
 properties:
   playerId:
     container:
@@ -29,14 +24,14 @@ properties:
       space: fantasy_football
       externalId: Player
     containerPropertyIdentifier: lastName
-  team:
+  plTeam:
     container:
       space: fantasy_football
       externalId: Player
-    containerPropertyIdentifier: team
+    containerPropertyIdentifier: plTeam
     source:
       space: fantasy_football
-      externalId: Team
+      externalId: PLTeam
       version: "1"
       type: view
   position:
@@ -69,4 +64,52 @@ properties:
       space: fantasy_football
       externalId: Player
     containerPropertyIdentifier: pointsPerGame
+  selections:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: PlayerSelection
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: PlayerSelection
+        version: "1"
+        type: view
+      identifier: player
+    name: Selections
+    description: All times this player was selected by any manager
+  transfersIn:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Transfer
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Transfer
+        version: "1"
+        type: view
+      identifier: playerIn
+    name: Transfers In
+    description: All transfers where this player was brought in
+  transfersOut:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Transfer
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Transfer
+        version: "1"
+        type: view
+      identifier: playerOut
+    name: Transfers Out
+    description: All transfers where this player was sold
 

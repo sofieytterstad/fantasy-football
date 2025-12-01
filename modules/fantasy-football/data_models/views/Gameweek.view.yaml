@@ -3,11 +3,6 @@ externalId: Gameweek
 version: "1"
 name: Gameweek
 description: Premier League gameweeks
-implements:
-  - space: fantasy_football
-    externalId: Gameweek
-    version: "1"
-    type: container
 properties:
   gameweekNumber:
     container:
@@ -44,4 +39,52 @@ properties:
       space: fantasy_football
       externalId: Gameweek
     containerPropertyIdentifier: highestScore
+  managerPerformances:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerGameweekPerformance
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerGameweekPerformance
+        version: "1"
+        type: view
+      identifier: gameweek
+    name: Manager Performances
+    description: All manager performance records for this gameweek
+  managerTeams:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: ManagerTeam
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: ManagerTeam
+        version: "1"
+        type: view
+      identifier: gameweek
+    name: Manager Teams
+    description: All manager fantasy teams created for this gameweek
+  transfers:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Transfer
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Transfer
+        version: "1"
+        type: view
+      identifier: gameweek
+    name: Transfers
+    description: All transfers made during this gameweek
 

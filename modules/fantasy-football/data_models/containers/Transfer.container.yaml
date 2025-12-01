@@ -7,32 +7,36 @@ properties:
   manager:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Manager
+      container:
+        space: fantasy_football
+        externalId: Manager
     nullable: true
     name: Manager
     description: Manager who made the transfer
   gameweek:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Gameweek
+      container:
+        space: fantasy_football
+        externalId: Gameweek
     nullable: true
     name: Gameweek
     description: Gameweek when transfer was made
   playerIn:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Player
+      container:
+        space: fantasy_football
+        externalId: Player
     nullable: true
     name: Player In
     description: Player transferred in
   playerOut:
     type:
       type: direct
-      space: fantasy_football
-      externalId: Player
+      container:
+        space: fantasy_football
+        externalId: Player
     nullable: true
     name: Player Out
     description: Player transferred out

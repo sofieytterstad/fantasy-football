@@ -1,0 +1,60 @@
+space: fantasy_football
+externalId: ManagerTeam
+name: Manager's Fantasy Team
+description: A manager's selected squad for a specific gameweek (15 players)
+usedFor: node
+properties:
+  manager:
+    type:
+      type: direct
+    nullable: true
+    name: Manager
+    description: The FPL manager who owns this team
+  gameweek:
+    type:
+      type: direct
+    nullable: true
+    name: Gameweek
+    description: The gameweek this team was selected for
+  captain:
+    type:
+      type: direct
+    nullable: true
+    name: Captain
+    description: The captain (gets 2x points)
+  viceCaptain:
+    type:
+      type: direct
+    nullable: true
+    name: Vice Captain
+    description: The vice captain (gets 2x if captain doesn't play)
+  totalPoints:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Total Points
+    description: Total points scored by this team in this gameweek
+  teamValue:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Team Value
+    description: Total value of the squad in millions
+  bank:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Bank
+    description: Money in the bank
+  activeChip:
+    type:
+      type: text
+      list: false
+    nullable: true
+    name: Active Chip
+    description: Chip used this gameweek (wildcard, bench boost, etc.)
+
+

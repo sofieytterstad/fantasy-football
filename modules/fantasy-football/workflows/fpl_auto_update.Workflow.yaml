@@ -1,0 +1,4 @@
+externalId: fpl_auto_update
+description: Automatically updates Fantasy Premier League data every other day at 3 AM UTC
+dataSetExternalId: ds_fantasy_football
+

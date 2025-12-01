@@ -1,0 +1,55 @@
+space: fantasy_football
+externalId: PlayerSelection
+name: Player Selection
+description: Tracks which player was selected in a manager's team for a gameweek
+usedFor: node
+properties:
+  managerTeam:
+    type:
+      type: direct
+    nullable: true
+    name: Manager Team
+    description: The manager's team this selection belongs to
+  player:
+    type:
+      type: direct
+    nullable: true
+    name: Player
+    description: The player selected
+  position:
+    type:
+      type: int32
+      list: false
+    nullable: false
+    name: Position
+    description: Position in the squad (1-15)
+  multiplier:
+    type:
+      type: int32
+      list: false
+    nullable: false
+    name: Multiplier
+    description: Points multiplier (2 for captain, 0 for bench)
+  isCaptain:
+    type:
+      type: boolean
+      list: false
+    nullable: false
+    name: Is Captain
+    description: True if this player is the captain
+  isViceCaptain:
+    type:
+      type: boolean
+      list: false
+    nullable: false
+    name: Is Vice Captain
+    description: True if this player is the vice captain
+  pointsScored:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Points Scored
+    description: Actual points scored by this player (before multiplier)
+
+

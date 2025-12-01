@@ -1,0 +1,12 @@
+externalId: fpl_auto_update_scheduled_trigger
+workflowExternalId: fpl_auto_update
+workflowVersion: "1"
+triggerRule:
+  triggerType: schedule
+  # Runs at 3:00 AM UTC every other day (every 2 days)
+  # Cron format: minute hour day-of-month month day-of-week
+  cronExpression: "0 3 */2 * *"
+authentication:
+  clientId: ${CDF_CLIENT_ID}
+  clientSecret: ${CDF_CLIENT_SECRET}
+

@@ -1,7 +1,7 @@
 space: fantasy_football
-externalId: Team
-name: Team
-description: Premier League teams
+externalId: PLTeam
+name: Premier League Team
+description: Real Premier League football clubs (Arsenal, Liverpool, etc.)
 usedFor: node
 properties:
   teamId:
