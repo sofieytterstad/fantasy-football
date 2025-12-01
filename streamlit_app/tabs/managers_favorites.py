@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from ..utils import apply_plotly_theme
 
 
 def render(client, managers_df, teams_dict, 
@@ -55,12 +56,11 @@ def render(client, managers_df, teams_dict,
 def _render_overview(betting_filtered, selected_manager):
     """Render overview metrics"""
     st.subheader(f"📊 {selected_manager}'s Overview")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     total_teams_used = betting_filtered["team_name"].nunique()
     total_players_used = betting_filtered["total_players_used"].sum()
     total_points_generated = betting_filtered["total_points"].sum()
-    avg_points_per_team = betting_filtered.groupby("team_name")["total_points"].sum().mean()
     
     with col1:
         st.metric("Teams Used", f"{total_teams_used}", 
@@ -73,10 +73,6 @@ def _render_overview(betting_filtered, selected_manager):
     with col3:
         st.metric("Total Points Generated", f"{int(total_points_generated):,}", 
                  help="Total points from all team selections")
-    
-    with col4:
-        st.metric("Avg Points per Team", f"{avg_points_per_team:.0f}", 
-                 help="Average points generated per team")
     
     st.markdown("---")
 
@@ -105,7 +101,6 @@ def _render_team_performance(betting_filtered, selected_manager, get_team_color)
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("**Most Picked Teams**")
         most_picked = team_summary.nlargest(10, "total_players_used")
         
         fig = go.Figure()
@@ -119,17 +114,17 @@ def _render_team_performance(betting_filtered, selected_manager, get_team_color)
             customdata=most_picked["total_points"]
         ))
         fig.update_layout(
-            title="Teams by Number of Player Selections",
+            title="Most Picked Teams",
             xaxis_title="Team",
             yaxis_title="Total Player Selections",
             xaxis_tickangle=-45,
             height=400,
             showlegend=False
         )
+        apply_plotly_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("**Most Valuable Teams (Points per Selection)**")
         most_valuable = team_summary.nlargest(10, "points_per_selection")
         
         fig = go.Figure()
@@ -143,13 +138,14 @@ def _render_team_performance(betting_filtered, selected_manager, get_team_color)
             customdata=most_valuable["total_points"]
         ))
         fig.update_layout(
-            title="Teams by Points per Player Selection",
+            title="Most Valuable Teams (Points per Selection)",
             xaxis_title="Team",
             yaxis_title="Points per Selection",
             xaxis_tickangle=-45,
             height=400,
             showlegend=False
         )
+        apply_plotly_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
     
     # Value analysis insights
@@ -197,7 +193,8 @@ def _render_manager_detail(client, managers_df, betting_filtered, players_dict, 
         manager_data = manager_data.sort_values("total_points", ascending=False)
         
         # Display teams with top player
-        st.markdown(f"**{selected_manager}'s Team Performance - Top Player per Team:**")
+        st.markdown(f"**Top Teams by Total Points (with Star Performer):**")
+        st.caption("_Top Performer = The player from each team who has earned the most points for this manager across all gameweeks_")
         
         # Get top player from each team
         with st.spinner("Loading top players..."):
@@ -251,33 +248,40 @@ def _render_manager_detail(client, managers_df, betting_filtered, players_dict, 
             # Show top player prominently if available
             if team_name in top_players_by_team:
                 top_player = top_players_by_team[team_name]
-                st.markdown(f"**⭐ Top Player:** {top_player['name']} - **{top_player['points']:.0f} points**")
+                st.markdown(f"**⭐ Top Performer:** {top_player['name']} - **{top_player['points']:.0f} points**")
             else:
                 st.caption("_No player data available_")
             
-            # Show metrics in columns
-            col1, col2, col3 = st.columns(3)
+            # Show team aggregate metrics
+            st.caption(f"_Team totals across all gameweeks:_")
+            col1, col2 = st.columns(2)
             with col1:
-                st.metric("Total Points", int(row["total_points"]))
+                st.metric("Total Team Points", int(row["total_points"]))
             with col2:
-                st.metric("Players Used", int(row["total_players_used"]))
-            with col3:
-                st.metric("Avg Pts/Player", f"{row['avg_points_per_player']:.1f}")
+                st.metric("Different Players Used", int(row["total_players_used"]))
             
             st.markdown("---")
         
         st.markdown("---")
         st.markdown("**Detailed Stats:**")
         
-        # Display stats table
-        display_data = manager_data[["team_name", "total_players_used", "total_points", 
-                                    "avg_points_per_player", "success_rate"]].copy()
-        display_data.columns = ["Team", "Players Used", "Total Points", "Avg Pts/Player", "Success Rate %"]
+        # Display stats table - simplified
+        display_data = manager_data[["team_name", "total_players_used", "total_points", "success_rate"]].copy()
+        
+        # Calculate points per selection for the table
+        display_data["points_per_selection"] = display_data.apply(
+            lambda row: round(row["total_points"] / row["total_players_used"], 1) 
+            if row["total_players_used"] > 0 else 0,
+            axis=1
+        )
+        
+        display_data = display_data[["team_name", "total_players_used", "total_points", "points_per_selection", "success_rate"]]
+        display_data.columns = ["Team", "Players Used", "Total Points", "Pts/Selection", "Success Rate %"]
         
         st.dataframe(
             display_data.style.format({
                 "Total Points": "{:.0f}",
-                "Avg Pts/Player": "{:.2f}",
+                "Pts/Selection": "{:.1f}",
                 "Success Rate %": "{:.1f}"
             }),
             use_container_width=True,
@@ -297,6 +301,7 @@ def _render_manager_detail(client, managers_df, betting_filtered, players_dict, 
             title=f"Where {selected_manager}'s Points Come From",
             height=500
         )
+        apply_plotly_theme(fig)
         st.plotly_chart(fig, use_container_width=True)
     
     st.markdown("---")

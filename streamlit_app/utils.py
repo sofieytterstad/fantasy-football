@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 from .config import (
     PREMIER_LEAGUE_COLORS, SPACE, VERSION,
     MANAGER_VIEW, GAMEWEEK_PERF_VIEW, TEAM_BETTING_VIEW,
-    TEAM_VIEW, TRANSFER_VIEW, PLAYER_VIEW, CACHE_TTL
+    TEAM_VIEW, TRANSFER_VIEW, PLAYER_VIEW, MANAGER_TEAM_VIEW,
+    GAMEWEEK_VIEW, CACHE_TTL, PLOTLY_THEME
 )
 
 # Load environment variables
@@ -150,7 +151,8 @@ def fetch_performance_data(_client, manager_external_id):
                         "gameweek": int(gw_num) if gw_num.isdigit() else 0,
                         "points": props.get("points", 0),
                         "total_points": props.get("totalPoints", 0),
-                        "rank": props.get("overallRank", 0),
+                        "rank": props.get("rank", 0),
+                        "gameweek_rank": props.get("gameweekRank", 0),
                         "transfers": props.get("transfers", 0),
                         "transfer_cost": props.get("transferCost", 0)
                     })
@@ -198,7 +200,7 @@ def fetch_team_betting_data(_client):
                 
                 if props and isinstance(props, dict):
                     manager_id = props.get("manager", {}).get("externalId", "")
-                    team_id = props.get("team", {}).get("externalId", "")
+                    team_id = props.get("plTeam", {}).get("externalId", "")
                     
                     betting_data.append({
                         "manager_id": manager_id,
@@ -320,8 +322,8 @@ def fetch_players(_client):
                     players[node.external_id] = {
                         "name": props.get("webName", "Unknown"),
                         "full_name": props.get("fullName", ""),
-                        "team_id": props.get("team", {}).get("externalId", ""),
-                        "position": props.get("elementType", "")
+                        "team_id": props.get("plTeam", {}).get("externalId", ""),
+                        "position": props.get("position", "")
                     }
         
         return players
@@ -398,6 +400,99 @@ def fetch_player_gameweek_points(_client):
         return pd.DataFrame()
 
 
+@st.cache_data(ttl=CACHE_TTL)
+def fetch_current_gameweek(_client):
+    """Fetch the current or latest finished gameweek"""
+    try:
+        gameweek_view = ViewId(space=SPACE, external_id=GAMEWEEK_VIEW, version=VERSION)
+        nodes = _client.data_modeling.instances.list(
+            instance_type="node",
+            sources=[gameweek_view],
+            limit=100
+        )
+        
+        gameweeks = []
+        for node in nodes:
+            if hasattr(node, 'properties'):
+                props_dict = node.properties.dump() if hasattr(node.properties, 'dump') else node.properties
+                props = props_dict.get(SPACE, {}).get(f"{GAMEWEEK_VIEW}/{VERSION}", {})
+                if props:
+                    gameweeks.append({
+                        "external_id": node.external_id,
+                        "gameweek_number": props.get("gameweekNumber", 0),
+                        "name": props.get("name", ""),
+                        "is_current": props.get("isCurrent", False),
+                        "is_finished": props.get("isFinished", False),
+                        "average_score": props.get("averageScore", 0),
+                        "highest_score": props.get("highestScore", 0)
+                    })
+        
+        if gameweeks:
+            # First try to find current gameweek
+            current = [gw for gw in gameweeks if gw["is_current"]]
+            if current:
+                return current[0]
+            # Otherwise get the latest finished gameweek
+            finished = [gw for gw in gameweeks if gw["is_finished"]]
+            if finished:
+                return max(finished, key=lambda x: x["gameweek_number"])
+            # Otherwise just get the latest gameweek
+            return max(gameweeks, key=lambda x: x["gameweek_number"])
+        
+        return None
+    except Exception as e:
+        st.error(f"Error fetching current gameweek: {e}")
+        return None
+
+
+@st.cache_data(ttl=CACHE_TTL)
+def fetch_manager_teams(_client, gameweek_number=None):
+    """Fetch manager teams for a specific gameweek (captain, chip info)"""
+    try:
+        manager_team_view = ViewId(space=SPACE, external_id=MANAGER_TEAM_VIEW, version=VERSION)
+        nodes = _client.data_modeling.instances.list(
+            instance_type="node",
+            sources=[manager_team_view],
+            limit=1000
+        )
+        
+        manager_teams = []
+        for node in nodes:
+            if hasattr(node, 'properties'):
+                props_dict = node.properties.dump() if hasattr(node.properties, 'dump') else node.properties
+                props = props_dict.get(SPACE, {}).get(f"{MANAGER_TEAM_VIEW}/{VERSION}", {})
+                if props:
+                    # Extract gameweek number from external_id or gameweek relation
+                    gameweek_id = props.get("gameweek", {}).get("externalId", "")
+                    gw_num = gameweek_id.split("_")[-1] if gameweek_id else "0"
+                    
+                    # If filtering by gameweek, skip if doesn't match
+                    if gameweek_number is not None:
+                        if not gw_num.isdigit() or int(gw_num) != gameweek_number:
+                            continue
+                    
+                    manager_id = props.get("manager", {}).get("externalId", "")
+                    captain_id = props.get("captain", {}).get("externalId", "")
+                    vice_captain_id = props.get("viceCaptain", {}).get("externalId", "")
+                    
+                    manager_teams.append({
+                        "external_id": node.external_id,
+                        "manager_id": manager_id,
+                        "gameweek": int(gw_num) if gw_num.isdigit() else 0,
+                        "captain_id": captain_id,
+                        "vice_captain_id": vice_captain_id,
+                        "active_chip": props.get("activeChip", ""),
+                        "total_points": props.get("totalPoints", 0),
+                        "team_value": props.get("teamValue", 0),
+                        "bank": props.get("bank", 0)
+                    })
+        
+        return pd.DataFrame(manager_teams)
+    except Exception as e:
+        st.error(f"Error fetching manager teams: {e}")
+        return pd.DataFrame()
+
+
 def get_team_color(team_name):
     """Get the primary color for a Premier League team"""
     colors = PREMIER_LEAGUE_COLORS.get(team_name, {"primary": "#38003c", "secondary": "#FFFFFF"})
@@ -408,4 +503,29 @@ def create_team_badge(team_name, team_color):
     """Create a colored badge HTML for a team"""
     text_color = "#FFFFFF" if team_name != "Fulham" else "#000000"
     return f'<span class="team-badge" style="background-color: {team_color}; color: {text_color};">{team_name}</span>'
+
+
+def apply_plotly_theme(fig):
+    """Apply custom theme to plotly figure without overwriting existing settings"""
+    fig.update_layout(
+        paper_bgcolor=PLOTLY_THEME["layout"]["paper_bgcolor"],
+        plot_bgcolor=PLOTLY_THEME["layout"]["plot_bgcolor"],
+        font=PLOTLY_THEME["layout"]["font"],
+        title_font=PLOTLY_THEME["layout"]["title"]["font"]
+    )
+    
+    # Update axis properties without overwriting titles
+    fig.update_xaxes(
+        gridcolor=PLOTLY_THEME["layout"]["xaxis"]["gridcolor"],
+        linecolor=PLOTLY_THEME["layout"]["xaxis"]["linecolor"],
+        tickfont=PLOTLY_THEME["layout"]["xaxis"]["tickfont"]
+    )
+    
+    fig.update_yaxes(
+        gridcolor=PLOTLY_THEME["layout"]["yaxis"]["gridcolor"],
+        linecolor=PLOTLY_THEME["layout"]["yaxis"]["linecolor"],
+        tickfont=PLOTLY_THEME["layout"]["yaxis"]["tickfont"]
+    )
+    
+    return fig
 
