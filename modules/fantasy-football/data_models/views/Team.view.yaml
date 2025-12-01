@@ -3,6 +3,11 @@ externalId: Team
 version: "1"
 name: Team
 description: Premier League teams
+implements:
+  - space: fantasy_football
+    externalId: Team
+    version: "1"
+    type: container
 properties:
   teamId:
     container:

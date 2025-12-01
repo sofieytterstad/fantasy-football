@@ -3,6 +3,11 @@ externalId: Manager
 version: "1"
 name: Manager
 description: FPL managers in your league
+implements:
+  - space: fantasy_football
+    externalId: Manager
+    version: "1"
+    type: container
 properties:
   entryId:
     container:

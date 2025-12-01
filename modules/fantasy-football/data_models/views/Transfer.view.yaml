@@ -3,27 +3,52 @@ externalId: Transfer
 version: "1"
 name: Transfer
 description: Manager transfers with success metrics
+implements:
+  - space: fantasy_football
+    externalId: Transfer
+    version: "1"
+    type: container
 properties:
   manager:
     container:
       space: fantasy_football
       externalId: Transfer
     containerPropertyIdentifier: manager
+    source:
+      space: fantasy_football
+      externalId: Manager
+      version: "1"
+      type: view
   gameweek:
     container:
       space: fantasy_football
       externalId: Transfer
     containerPropertyIdentifier: gameweek
+    source:
+      space: fantasy_football
+      externalId: Gameweek
+      version: "1"
+      type: view
   playerIn:
     container:
       space: fantasy_football
       externalId: Transfer
     containerPropertyIdentifier: playerIn
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
   playerOut:
     container:
       space: fantasy_football
       externalId: Transfer
     containerPropertyIdentifier: playerOut
+    source:
+      space: fantasy_football
+      externalId: Player
+      version: "1"
+      type: view
   transferCost:
     container:
       space: fantasy_football

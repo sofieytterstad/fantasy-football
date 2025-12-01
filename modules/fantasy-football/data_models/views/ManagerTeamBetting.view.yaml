@@ -3,17 +3,32 @@ externalId: ManagerTeamBetting
 version: "1"
 name: ManagerTeamBetting
 description: Tracks which Premier League teams a manager is good at picking players from
+implements:
+  - space: fantasy_football
+    externalId: ManagerTeamBetting
+    version: "1"
+    type: container
 properties:
   manager:
     container:
       space: fantasy_football
       externalId: ManagerTeamBetting
     containerPropertyIdentifier: manager
+    source:
+      space: fantasy_football
+      externalId: Manager
+      version: "1"
+      type: view
   team:
     container:
       space: fantasy_football
       externalId: ManagerTeamBetting
     containerPropertyIdentifier: team
+    source:
+      space: fantasy_football
+      externalId: Team
+      version: "1"
+      type: view
   totalPlayersUsed:
     container:
       space: fantasy_football

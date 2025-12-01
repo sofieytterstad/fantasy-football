@@ -3,17 +3,32 @@ externalId: ManagerGameweekPerformance
 version: "1"
 name: Manager Gameweek Performance
 description: Manager performance per gameweek
+implements:
+  - space: fantasy_football
+    externalId: ManagerGameweekPerformance
+    version: "1"
+    type: container
 properties:
   manager:
     container:
       space: fantasy_football
       externalId: ManagerGameweekPerformance
     containerPropertyIdentifier: manager
+    source:
+      space: fantasy_football
+      externalId: Manager
+      version: "1"
+      type: view
   gameweek:
     container:
       space: fantasy_football
       externalId: ManagerGameweekPerformance
     containerPropertyIdentifier: gameweek
+    source:
+      space: fantasy_football
+      externalId: Gameweek
+      version: "1"
+      type: view
   points:
     container:
       space: fantasy_football

@@ -3,6 +3,11 @@ externalId: Player
 version: "1"
 name: Player
 description: FPL players with their stats and performance
+implements:
+  - space: fantasy_football
+    externalId: Player
+    version: "1"
+    type: container
 properties:
   playerId:
     container:
@@ -29,6 +34,11 @@ properties:
       space: fantasy_football
       externalId: Player
     containerPropertyIdentifier: team
+    source:
+      space: fantasy_football
+      externalId: Team
+      version: "1"
+      type: view
   position:
     container:
       space: fantasy_football

@@ -3,6 +3,11 @@ externalId: Gameweek
 version: "1"
 name: Gameweek
 description: Premier League gameweeks
+implements:
+  - space: fantasy_football
+    externalId: Gameweek
+    version: "1"
+    type: container
 properties:
   gameweekNumber:
     container:
