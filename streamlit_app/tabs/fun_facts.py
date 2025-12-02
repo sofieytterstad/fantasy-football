@@ -5,7 +5,7 @@ import streamlit as st
 import pandas as pd
 
 
-def render(managers_df, client=None, fetch_transfer_data=None):
+def render(managers_df, client=None, fetch_transfer_data=None, fetch_players=None):
     """Render the Fun Facts tab"""
     st.header("🎉 Fun Facts & Category Leaders")
     st.write("Discover the most interesting stats and see who leads in different categories!")
@@ -15,6 +15,16 @@ def render(managers_df, client=None, fetch_transfer_data=None):
     if client and fetch_transfer_data:
         try:
             transfers_df = fetch_transfer_data(client)
+            # If we have transfers but no player names, add them
+            if not transfers_df.empty and 'player_out_name' not in transfers_df.columns and fetch_players:
+                players_dict = fetch_players(client)
+                if players_dict:
+                    transfers_df['player_out_name'] = transfers_df['player_out_id'].apply(
+                        lambda x: players_dict.get(x, {}).get('web_name', 'Unknown')
+                    )
+                    transfers_df['player_in_name'] = transfers_df['player_in_id'].apply(
+                        lambda x: players_dict.get(x, {}).get('web_name', 'Unknown')
+                    )
         except:
             pass
     
@@ -178,8 +188,14 @@ def render(managers_df, client=None, fetch_transfer_data=None):
                 manager_name = f"Manager {manager_id_str}"
             
             st.markdown(f"**{manager_name}**")
-            st.write(f"🔄 {best_single['player_out_name']} → {best_single['player_in_name']}")
-            st.write(f"💰 GW{int(best_single['gameweek'])} | Net gain: **+{best_single['net_benefit']:.1f} pts**")
+            
+            # Show player names if available, otherwise just IDs
+            if 'player_out_name' in best_single and 'player_in_name' in best_single:
+                st.write(f"🔄 {best_single['player_out_name']} → {best_single['player_in_name']}")
+            else:
+                st.write(f"🔄 Player transfer in GW{int(best_single['gameweek'])}")
+            
+            st.write(f"💰 Net gain: **+{best_single['net_benefit']:.1f} pts**")
         else:
             st.info("Transfer data not available")
         
