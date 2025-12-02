@@ -147,7 +147,7 @@ def main():
         )
     
     with tab7:
-        fun_facts.render(managers_df)
+        fun_facts.render(managers_df, client, fetch_transfer_data)
     
     # Footer
     st.markdown("---")
