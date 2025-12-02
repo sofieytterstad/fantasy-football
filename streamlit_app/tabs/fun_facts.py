@@ -114,7 +114,7 @@ def render(managers_df, client=None, fetch_transfer_data=None):
         st.markdown("---")
         
         st.markdown("### 📊 Most Profitable Transfers")
-        st.caption("_Best net benefit from transfers_")
+        st.caption("_Best average net benefit_")
         # Calculate actual transfer profitability using transfer data
         if transfers_df is not None and not transfers_df.empty:
             # Calculate average net benefit per transfer for each manager
@@ -158,6 +158,30 @@ def render(managers_df, client=None, fetch_transfer_data=None):
                 st.markdown(f"**{best_efficiency['manager_name']}**")
                 st.write(f"⚡ {best_efficiency['points_per_transfer']:.1f} points per transfer")
                 st.write(f"Total: {int(best_efficiency['overall_points']):,} points with {int(best_efficiency['total_transfers'])} transfers")
+        
+        st.markdown("---")
+        
+        st.markdown("### 🎯 Best Single Transfer")
+        st.caption("_Highest net benefit from one move_")
+        # Find the single best transfer
+        if transfers_df is not None and not transfers_df.empty:
+            best_single = transfers_df.nlargest(1, 'net_benefit').iloc[0]
+            
+            # Get manager name
+            manager_id_str = best_single['manager_id']
+            entry_id = manager_id_str.replace("manager_", "") if isinstance(manager_id_str, str) else manager_id_str
+            try:
+                entry_id = int(entry_id)
+                manager_info = managers_df[managers_df['entry_id'] == entry_id]
+                manager_name = manager_info['manager_name'].iloc[0] if not manager_info.empty else f"Manager {entry_id}"
+            except:
+                manager_name = f"Manager {manager_id_str}"
+            
+            st.markdown(f"**{manager_name}**")
+            st.write(f"🔄 {best_single['player_out_name']} → {best_single['player_in_name']}")
+            st.write(f"💰 GW{int(best_single['gameweek'])} | Net gain: **+{best_single['net_benefit']:.1f} pts**")
+        else:
+            st.info("Transfer data not available")
         
         st.markdown("---")
         
