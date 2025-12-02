@@ -201,6 +201,36 @@ def render(managers_df, client=None, fetch_transfer_data=None, fetch_players=Non
         
         st.markdown("---")
         
+        st.markdown("### 💸 Worst Single Transfer")
+        st.caption("_Biggest regret of the season_")
+        # Find the single worst transfer
+        if transfers_df is not None and not transfers_df.empty:
+            worst_single = transfers_df.nsmallest(1, 'net_benefit').iloc[0]
+            
+            # Get manager name
+            manager_id_str = worst_single['manager_id']
+            entry_id = manager_id_str.replace("manager_", "") if isinstance(manager_id_str, str) else manager_id_str
+            try:
+                entry_id = int(entry_id)
+                manager_info = managers_df[managers_df['entry_id'] == entry_id]
+                manager_name = manager_info['manager_name'].iloc[0] if not manager_info.empty else f"Manager {entry_id}"
+            except:
+                manager_name = f"Manager {manager_id_str}"
+            
+            st.markdown(f"**{manager_name}**")
+            
+            # Show player names if available, otherwise just IDs
+            if 'player_out_name' in worst_single and 'player_in_name' in worst_single:
+                st.write(f"🔄 {worst_single['player_out_name']} → {worst_single['player_in_name']}")
+            else:
+                st.write(f"🔄 Player transfer in GW{int(worst_single['gameweek'])}")
+            
+            st.write(f"💸 Net loss: **{worst_single['net_benefit']:.1f} pts**")
+        else:
+            st.info("Transfer data not available")
+        
+        st.markdown("---")
+        
         st.markdown("### 🎲 The Wildcard King")
         st.caption("_Most transfers but still in top ranks_")
         # Manager with most transfers who is in top 30% of ranks
