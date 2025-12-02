@@ -1,0 +1,37 @@
+space: fantasy_football
+externalId: FantasyFootball
+version: "3"
+name: Fantasy Football Data Model
+description: Complete data model for Fantasy Premier League analytics including fixtures
+views:
+  - space: fantasy_football
+    externalId: Fixture
+    version: "1"
+  - space: fantasy_football
+    externalId: Gameweek
+    version: "1"
+  - space: fantasy_football
+    externalId: Manager
+    version: "1"
+  - space: fantasy_football
+    externalId: ManagerGameweekPerformance
+    version: "1"
+  - space: fantasy_football
+    externalId: ManagerTeam
+    version: "1"
+  - space: fantasy_football
+    externalId: ManagerTeamBetting
+    version: "1"
+  - space: fantasy_football
+    externalId: PLTeam
+    version: "1"
+  - space: fantasy_football
+    externalId: Player
+    version: "1"
+  - space: fantasy_football
+    externalId: PlayerSelection
+    version: "1"
+  - space: fantasy_football
+    externalId: Transfer
+    version: "1"
+

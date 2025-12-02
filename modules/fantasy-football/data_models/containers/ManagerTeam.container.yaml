@@ -56,5 +56,12 @@ properties:
     nullable: true
     name: Active Chip
     description: Chip used this gameweek (wildcard, bench boost, etc.)
+  formation:
+    type:
+      type: text
+      list: false
+    nullable: true
+    name: Formation
+    description: Team formation used (e.g., "4-3-3", "3-5-2", "4-4-2")
 
 

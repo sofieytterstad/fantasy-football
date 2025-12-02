@@ -1,0 +1,112 @@
+space: fantasy_football
+externalId: Fixture
+version: "1"
+name: Fixture
+description: Premier League fixtures with difficulty ratings and betting odds
+properties:
+  fixtureId:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: fixtureId
+  gameweek:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: gameweek
+    source:
+      space: fantasy_football
+      externalId: Gameweek
+      version: "1"
+      type: view
+  homeTeam:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: homeTeam
+    source:
+      space: fantasy_football
+      externalId: PLTeam
+      version: "1"
+      type: view
+  awayTeam:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: awayTeam
+    source:
+      space: fantasy_football
+      externalId: PLTeam
+      version: "1"
+      type: view
+  kickoffTime:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: kickoffTime
+  homeTeamDifficulty:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: homeTeamDifficulty
+  awayTeamDifficulty:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: awayTeamDifficulty
+  homeTeamScore:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: homeTeamScore
+  awayTeamScore:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: awayTeamScore
+  isFinished:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: isFinished
+  started:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: started
+  provisionalStartTime:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: provisionalStartTime
+  homeWinOdds:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: homeWinOdds
+  drawOdds:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: drawOdds
+  awayWinOdds:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: awayWinOdds
+  homeWinProbability:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: homeWinProbability
+  drawProbability:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: drawProbability
+  awayWinProbability:
+    container:
+      space: fantasy_football
+      externalId: Fixture
+    containerPropertyIdentifier: awayWinProbability
+

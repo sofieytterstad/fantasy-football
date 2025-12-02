@@ -121,7 +121,7 @@ def render(client, managers_df, fetch_transfer_data, fetch_players):
                 fill='tonexty',
                 fillcolor='rgba(0, 255, 150, 0.1)',
                 hovertemplate='GW %{x}<br>Net benefit: %{y:.1f} pts<extra></extra>'
-            ))
+                ))
             
             # Add markers for individual transfers
             colors = ['green' if x > 0 else 'red' for x in transfer_filtered['net_benefit']]
@@ -137,9 +137,9 @@ def render(client, managers_df, fetch_transfer_data, fetch_players):
                     line=dict(width=1, color='white')
                 ),
                 hovertemplate='<b>GW %{x}</b><br>' +
-                              'Transfer: ' + transfer_filtered['player_out_name'] + ' → ' + transfer_filtered['player_in_name'] + '<br>' +
-                              'Net benefit this GW: ' + transfer_filtered['net_benefit'].apply(lambda x: f'{x:.1f}') + ' pts<br>' +
-                              'Cumulative: %{y:.1f} pts<extra></extra>',
+                             'Transfer: ' + transfer_filtered['player_out_name'] + ' → ' + transfer_filtered['player_in_name'] + '<br>' +
+                             'Net benefit this GW: ' + transfer_filtered['net_benefit'].apply(lambda x: f'{x:.1f}') + ' pts<br>' +
+                             'Cumulative: %{y:.1f} pts<extra></extra>',
                 showlegend=False
             ))
             
@@ -231,7 +231,7 @@ def render(client, managers_df, fetch_transfer_data, fetch_players):
                 textfont=dict(size=11, color='white'),
                 hovertemplate='<b>%{y}</b><br>Net benefit: %{x:.1f} pts<extra></extra>',
                 showlegend=False
-            ))
+                ))
             
             # Add vertical line at zero
             fig.add_vline(

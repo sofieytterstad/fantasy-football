@@ -71,6 +71,22 @@ properties:
       identifier: gameweek
     name: Manager Teams
     description: All manager fantasy teams created for this gameweek
+  fixtures:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Fixture
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Fixture
+        version: "1"
+        type: view
+      identifier: gameweek
+    name: Fixtures
+    description: All fixtures in this gameweek
   transfers:
     connectionType: multi_reverse_direct_relation
     source:

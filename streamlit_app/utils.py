@@ -14,7 +14,7 @@ from .config import (
     PREMIER_LEAGUE_COLORS, SPACE, VERSION,
     MANAGER_VIEW, GAMEWEEK_PERF_VIEW, TEAM_BETTING_VIEW,
     TEAM_VIEW, TRANSFER_VIEW, PLAYER_VIEW, MANAGER_TEAM_VIEW,
-    GAMEWEEK_VIEW, CACHE_TTL, PLOTLY_THEME
+    GAMEWEEK_VIEW, FIXTURE_VIEW, CACHE_TTL, PLOTLY_THEME
 )
 
 # Load environment variables
@@ -304,7 +304,7 @@ def fetch_transfer_data(_client):
 
 @st.cache_data(ttl=CACHE_TTL)
 def fetch_players(_client):
-    """Fetch player data"""
+    """Fetch player data with detailed statistics"""
     try:
         player_view = ViewId(space=SPACE, external_id=PLAYER_VIEW, version=VERSION)
         nodes = _client.data_modeling.instances.list(
@@ -313,17 +313,30 @@ def fetch_players(_client):
             limit=1000
         )
         
+        # Also get teams dict for team names
+        teams_dict = fetch_teams(_client)
+        
         players = {}
         for node in nodes:
             if hasattr(node, 'properties'):
                 props_dict = node.properties.dump() if hasattr(node.properties, 'dump') else node.properties
                 props = props_dict.get(SPACE, {}).get(f"{PLAYER_VIEW}/{VERSION}", {})
                 if props:
+                    team_id = props.get("plTeam", {}).get("externalId", "")
+                    team_name = teams_dict.get(team_id, "Unknown") if team_id else "Unknown"
+                    
                     players[node.external_id] = {
                         "name": props.get("webName", "Unknown"),
+                        "web_name": props.get("webName", "Unknown"),
                         "full_name": props.get("fullName", ""),
-                        "team_id": props.get("plTeam", {}).get("externalId", ""),
-                        "position": props.get("position", "")
+                        "team_id": team_id,
+                        "team_name": team_name,
+                        "position": props.get("position", ""),
+                        "current_price": props.get("currentPrice", 0),
+                        "total_points": props.get("totalPoints", 0),
+                        "form": props.get("form", 0),
+                        "selected_by_percent": props.get("selectedByPercent", 0),
+                        "points_per_game": props.get("pointsPerGame", 0)
                     }
         
         return players
@@ -361,7 +374,10 @@ def fetch_player_picks_from_raw(_client):
                         "manager_entry_id": cols.get("entry_id"),
                         "gameweek": cols.get("gameweek"),
                         "player_id": pick.get("element"),
-                        "multiplier": pick.get("multiplier", 1)
+                        "multiplier": pick.get("multiplier", 1),
+                        "is_captain": pick.get("is_captain", False),
+                        "is_vice_captain": pick.get("is_vice_captain", False),
+                        "position": pick.get("position")
                     })
             except Exception as e:
                 parse_errors += 1
@@ -482,6 +498,7 @@ def fetch_manager_teams(_client, gameweek_number=None):
                         "captain_id": captain_id,
                         "vice_captain_id": vice_captain_id,
                         "active_chip": props.get("activeChip", ""),
+                        "formation": props.get("formation"),
                         "total_points": props.get("totalPoints", 0),
                         "team_value": props.get("teamValue", 0),
                         "bank": props.get("bank", 0)
@@ -503,6 +520,63 @@ def create_team_badge(team_name, team_color):
     """Create a colored badge HTML for a team"""
     text_color = "#FFFFFF" if team_name != "Fulham" else "#000000"
     return f'<span class="team-badge" style="background-color: {team_color}; color: {text_color};">{team_name}</span>'
+
+
+@st.cache_data(ttl=CACHE_TTL)
+def fetch_fixtures(_client):
+    """Fetch all fixtures with odds and difficulty ratings"""
+    try:
+        from cognite.client.data_classes.data_modeling.ids import ViewId
+        
+        fixture_view = ViewId(space=SPACE, external_id="Fixture", version=VERSION)
+        nodes = _client.data_modeling.instances.list(
+            instance_type="node",
+            sources=[fixture_view],
+            limit=500
+        )
+        
+        fixtures = []
+        for node in nodes:
+            if hasattr(node, 'properties'):
+                props_dict = node.properties.dump() if hasattr(node.properties, 'dump') else node.properties
+                props = props_dict.get(SPACE, {}).get(f"Fixture/{VERSION}", {})
+                
+                if props:
+                    # Extract team IDs
+                    home_team = props.get('homeTeam', {})
+                    away_team = props.get('awayTeam', {})
+                    gameweek = props.get('gameweek', {})
+                    
+                    home_team_id = home_team.get('externalId', '') if isinstance(home_team, dict) else ''
+                    away_team_id = away_team.get('externalId', '') if isinstance(away_team, dict) else ''
+                    gameweek_id = gameweek.get('externalId', '') if isinstance(gameweek, dict) else ''
+                    
+                    gw_num = gameweek_id.split('_')[-1] if gameweek_id else '0'
+                    
+                    fixtures.append({
+                        "fixture_id": props.get("fixtureId"),
+                        "gameweek": int(gw_num) if gw_num.isdigit() else 0,
+                        "home_team_id": home_team_id,
+                        "away_team_id": away_team_id,
+                        "kickoff_time": props.get("kickoffTime"),
+                        "home_team_difficulty": props.get("homeTeamDifficulty"),
+                        "away_team_difficulty": props.get("awayTeamDifficulty"),
+                        "home_team_score": props.get("homeTeamScore"),
+                        "away_team_score": props.get("awayTeamScore"),
+                        "is_finished": props.get("isFinished", False),
+                        "started": props.get("started", False),
+                        "home_win_odds": props.get("homeWinOdds"),
+                        "draw_odds": props.get("drawOdds"),
+                        "away_win_odds": props.get("awayWinOdds"),
+                        "home_win_probability": props.get("homeWinProbability"),
+                        "draw_probability": props.get("drawProbability"),
+                        "away_win_probability": props.get("awayWinProbability"),
+                    })
+        
+        return pd.DataFrame(fixtures)
+    except Exception as e:
+        st.error(f"Error fetching fixtures: {e}")
+        return pd.DataFrame()
 
 
 def apply_plotly_theme(fig):

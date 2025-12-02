@@ -64,6 +64,11 @@ properties:
       space: fantasy_football
       externalId: ManagerTeam
     containerPropertyIdentifier: activeChip
+  formation:
+    container:
+      space: fantasy_football
+      externalId: ManagerTeam
+    containerPropertyIdentifier: formation
   playerSelections:
     connectionType: multi_reverse_direct_relation
     source:

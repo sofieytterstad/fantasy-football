@@ -1,0 +1,130 @@
+space: fantasy_football
+externalId: Fixture
+name: Fixture
+description: Premier League match fixtures with difficulty ratings and odds
+usedFor: node
+properties:
+  fixtureId:
+    type:
+      type: int32
+      list: false
+    nullable: false
+    name: Fixture ID
+    description: FPL fixture ID
+  gameweek:
+    type:
+      type: direct
+    nullable: true
+    name: Gameweek
+    description: The gameweek this fixture belongs to
+  homeTeam:
+    type:
+      type: direct
+    nullable: true
+    name: Home Team
+    description: Home team
+  awayTeam:
+    type:
+      type: direct
+    nullable: true
+    name: Away Team
+    description: Away team
+  kickoffTime:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    name: Kickoff Time
+    description: Match kickoff time
+  homeTeamDifficulty:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Home Team Difficulty
+    description: FPL difficulty rating for home team (1-5, where 5 is hardest)
+  awayTeamDifficulty:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Away Team Difficulty
+    description: FPL difficulty rating for away team (1-5, where 5 is hardest)
+  homeTeamScore:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Home Team Score
+    description: Home team final score (null if match not finished)
+  awayTeamScore:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Away Team Score
+    description: Away team final score (null if match not finished)
+  isFinished:
+    type:
+      type: boolean
+      list: false
+    nullable: true
+    name: Is Finished
+    description: Whether match is finished
+  started:
+    type:
+      type: boolean
+      list: false
+    nullable: true
+    name: Started
+    description: Whether match has started
+  provisionalStartTime:
+    type:
+      type: boolean
+      list: false
+    nullable: true
+    name: Provisional Start Time
+    description: Whether kickoff time is provisional
+  homeWinOdds:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Home Win Odds
+    description: Betting odds for home win (decimal format)
+  drawOdds:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Draw Odds
+    description: Betting odds for draw (decimal format)
+  awayWinOdds:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Away Win Odds
+    description: Betting odds for away win (decimal format)
+  homeWinProbability:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Home Win Probability
+    description: Calculated probability of home win (0-1)
+  drawProbability:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Draw Probability
+    description: Calculated probability of draw (0-1)
+  awayWinProbability:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Away Win Probability
+    description: Calculated probability of away win (0-1)
+

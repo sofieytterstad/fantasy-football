@@ -9,12 +9,12 @@ from .utils import (
     get_cdf_client, fetch_managers, fetch_performance_data,
     fetch_team_betting_data, fetch_teams, fetch_transfer_data,
     fetch_players, fetch_player_picks_from_raw, fetch_player_gameweek_points,
-    fetch_current_gameweek, fetch_manager_teams,
+    fetch_current_gameweek, fetch_manager_teams, fetch_fixtures,
     get_team_color, create_team_badge
 )
 from .tabs import (
     leaderboard, performance_trends, transfer_analysis,
-    managers_favorites, fun_facts
+    managers_favorites, fun_facts, formation_analysis, fixture_odds_analysis
 )
 
 
@@ -92,17 +92,21 @@ def main():
         - **📈 Performance Trends** - Track performance over time with beautiful charts
         - **🔄 Transfer Analysis** - Analyze transfer strategies and patterns
         - **⭐ Manager's Favorites** - Discover which Premier League teams managers favor
+        - **⚽ Formation Analysis** - Compare formation strategies and their profitability
+        - **🎯 Fixture & Odds** - Identify profitable teams based on fixtures and performance
         - **🎉 Fun Facts** - Interesting stats and category leaders
         
         **Tip:** Hover over charts and metrics for more details! 💡
         """)
     
     # Tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "📊 Leaderboard", 
         "📈 Performance Trends", 
         "🔄 Transfer Analysis",
-        "⭐ Manager's Favorites", 
+        "⭐ Manager's Favorites",
+        "⚽ Formation Analysis",
+        "🎯 Fixture & Odds",
         "🎉 Fun Facts"
     ])
     
@@ -132,6 +136,17 @@ def main():
         )
     
     with tab5:
+        formation_analysis.render(
+            client, managers_df, fetch_manager_teams, fetch_players, fetch_player_picks_from_raw
+        )
+    
+    with tab6:
+        fixture_odds_analysis.render(
+            client, managers_df, fetch_teams,
+            fetch_players, fetch_team_betting_data, fetch_fixtures
+        )
+    
+    with tab7:
         fun_facts.render(managers_df)
     
     # Footer

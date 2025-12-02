@@ -24,6 +24,83 @@ properties:
       space: fantasy_football
       externalId: PLTeam
     containerPropertyIdentifier: strength
+  strengthOverallHome:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthOverallHome
+  strengthOverallAway:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthOverallAway
+  strengthAttackHome:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthAttackHome
+  strengthAttackAway:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthAttackAway
+  strengthDefenceHome:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthDefenceHome
+  strengthDefenceAway:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: strengthDefenceAway
+  upcomingFixtureDifficulty:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: upcomingFixtureDifficulty
+  nextFixture:
+    container:
+      space: fantasy_football
+      externalId: PLTeam
+    containerPropertyIdentifier: nextFixture
+    source:
+      space: fantasy_football
+      externalId: Fixture
+      version: "1"
+      type: view
+  homeFixtures:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Fixture
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Fixture
+        version: "1"
+        type: view
+      identifier: homeTeam
+    name: Home Fixtures
+    description: All fixtures where this team is home
+  awayFixtures:
+    connectionType: multi_reverse_direct_relation
+    source:
+      space: fantasy_football
+      externalId: Fixture
+      version: "1"
+      type: view
+    through:
+      source:
+        space: fantasy_football
+        externalId: Fixture
+        version: "1"
+        type: view
+      identifier: awayTeam
+    name: Away Fixtures
+    description: All fixtures where this team is away
   players:
     connectionType: multi_reverse_direct_relation
     source:

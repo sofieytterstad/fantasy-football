@@ -379,6 +379,7 @@ TRANSFER_VIEW = "Transfer"
 PLAYER_VIEW = "Player"
 MANAGER_TEAM_VIEW = "ManagerTeam"
 GAMEWEEK_VIEW = "Gameweek"
+FIXTURE_VIEW = "Fixture"
 
 # Cache TTL (in seconds)
 CACHE_TTL = 3600  # 1 hour

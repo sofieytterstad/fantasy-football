@@ -1,6 +1,6 @@
 """
 Comprehensive Fantasy Premier League Data Update Function
-Loads all FPL data (teams, players, managers, performance, transfers, betting) to CDF data model instances
+Loads all FPL data (teams, players, managers, performance, transfers, betting, fixtures, odds) to CDF data model instances
 """
 import os
 import time
@@ -12,6 +12,14 @@ import requests
 import numpy as np
 from cognite.client import CogniteClient
 from cognite.client.data_classes.data_modeling import NodeApply, NodeOrEdgeData
+
+# Try to import OddsFetcher - if not available, will skip odds enrichment
+try:
+    from odds_fetcher import OddsFetcher
+    ODDS_AVAILABLE = True
+except ImportError:
+    ODDS_AVAILABLE = False
+    print("⚠️  OddsFetcher not available - skipping odds enrichment")
 
 
 class FPLClient:
@@ -48,6 +56,12 @@ class FPLClient:
         response = requests.get(f"{self.BASE_URL}/entry/{entry_id}/event/{gameweek}/picks/")
         response.raise_for_status()
         return response.json()
+    
+    def get_fixtures(self):
+        """Fetch all fixtures"""
+        response = requests.get(f"{self.BASE_URL}/fixtures/")
+        response.raise_for_status()
+        return response.json()
 
 
 def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
@@ -68,6 +82,8 @@ def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
     
     stats = {
         "teams": 0,
+        "fixtures": 0,
+        "fixtures_with_odds": 0,
         "gameweeks": 0,
         "players": 0,
         "managers": 0,
@@ -76,6 +92,7 @@ def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
         "player_selections": 0,
         "transfers": 0,
         "team_betting_records": 0,
+        "formations_calculated": 0,
         "errors": []
     }
     
@@ -122,6 +139,162 @@ def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
         client.data_modeling.instances.apply(nodes=team_nodes, auto_create_direct_relations=True)
         stats["teams"] = len(team_nodes)
         print(f"  ✓ Loaded {len(team_nodes)} teams")
+        
+        # =====================================================================
+        # STEP 2.5: Load Fixtures (with odds if available)
+        # =====================================================================
+        print("Loading fixtures...")
+        try:
+            fixtures_raw = fpl_client.get_fixtures()
+            print(f"  Fetched {len(fixtures_raw)} fixtures from FPL API")
+            
+            # Enrich with odds if available
+            if ODDS_AVAILABLE:
+                api_key = os.getenv("ODDS_API_KEY")
+                if api_key:
+                    print("  Fetching betting odds...")
+                    try:
+                        fetcher = OddsFetcher(api_key=api_key, source='odds_api')
+                        odds_data = fetcher.fetch_premier_league_odds()
+                        
+                        if odds_data:
+                            print(f"  ✓ Fetched odds for {len(odds_data)} matches")
+                            
+                            # Add team names to fixtures for matching
+                            for fixture in fixtures_raw:
+                                home_team_id = fixture.get('team_h')
+                                away_team_id = fixture.get('team_a')
+                                fixture['team_h_name'] = teams_dict.get(home_team_id, {}).get('name', 'Unknown')
+                                fixture['team_a_name'] = teams_dict.get(away_team_id, {}).get('name', 'Unknown')
+                            
+                            fixtures_raw = fetcher.match_with_fpl_fixtures(odds_data, fixtures_raw)
+                            stats["fixtures_with_odds"] = sum(1 for f in fixtures_raw if f.get('home_win_odds'))
+                            print(f"  ✓ Matched odds for {stats['fixtures_with_odds']} fixtures")
+                        else:
+                            print("  ⚠️  No odds data available")
+                    except Exception as e:
+                        print(f"  ⚠️  Failed to fetch odds: {e}")
+                else:
+                    print("  ⚠️  No ODDS_API_KEY configured, skipping odds")
+            
+            # Create fixture nodes
+            fixture_nodes = []
+            for fixture in fixtures_raw:
+                fixture_id = fixture['id']
+                gameweek = fixture.get('event')
+                
+                # Skip fixtures without gameweek (postponed)
+                if not gameweek:
+                    continue
+                
+                home_team_id = fixture.get('team_h')
+                away_team_id = fixture.get('team_a')
+                
+                # Parse kickoff time
+                kickoff = None
+                if fixture.get('kickoff_time'):
+                    try:
+                        kickoff = datetime.fromisoformat(fixture['kickoff_time'].replace('Z', '+00:00'))
+                    except:
+                        pass
+                
+                props = {
+                    "fixtureId": fixture_id,
+                    "gameweek": {"space": SPACE, "externalId": f"gameweek_{gameweek}"},
+                    "homeTeam": {"space": SPACE, "externalId": f"team_{home_team_id}"} if home_team_id else None,
+                    "awayTeam": {"space": SPACE, "externalId": f"team_{away_team_id}"} if away_team_id else None,
+                    "kickoffTime": kickoff,
+                    "homeTeamDifficulty": fixture.get('team_h_difficulty'),
+                    "awayTeamDifficulty": fixture.get('team_a_difficulty'),
+                    "homeTeamScore": fixture.get('team_h_score'),
+                    "awayTeamScore": fixture.get('team_a_score'),
+                    "isFinished": fixture.get('finished', False),
+                    "started": fixture.get('started', False),
+                    "provisionalStartTime": fixture.get('provisional_start_time', False)
+                }
+                
+                # Add odds if available
+                if fixture.get('home_win_odds'):
+                    props.update({
+                        "homeWinOdds": fixture.get('home_win_odds'),
+                        "drawOdds": fixture.get('draw_odds'),
+                        "awayWinOdds": fixture.get('away_win_odds'),
+                        "homeWinProbability": fixture.get('home_win_probability'),
+                        "drawProbability": fixture.get('draw_probability'),
+                        "awayWinProbability": fixture.get('away_win_probability')
+                    })
+                
+                fixture_nodes.append(NodeApply(
+                    space=SPACE,
+                    external_id=f"fixture_{fixture_id}",
+                    sources=[
+                        NodeOrEdgeData(
+                            source={"space": SPACE, "externalId": "Fixture", "version": VERSION, "type": "view"},
+                            properties=props
+                        )
+                    ]
+                ))
+            
+            # Load fixtures in batches
+            batch_size = 100
+            for i in range(0, len(fixture_nodes), batch_size):
+                batch = fixture_nodes[i:i + batch_size]
+                client.data_modeling.instances.apply(nodes=batch, auto_create_direct_relations=True)
+            
+            stats["fixtures"] = len(fixture_nodes)
+            print(f"  ✓ Loaded {len(fixture_nodes)} fixtures")
+            
+            # Update team strength and next fixture info
+            print("  Updating team strength ratings...")
+            for team in teams:
+                team_id = team['id']
+                # Find next unfinished fixture for this team
+                next_fixtures = [f for f in fixtures_raw 
+                                if (f.get('team_h') == team_id or f.get('team_a') == team_id) 
+                                and not f.get('finished')]
+                next_fixture_id = next_fixtures[0]['id'] if next_fixtures else None
+                
+                # Calculate upcoming fixture difficulty (average of next 3-5 fixtures)
+                upcoming_difficulties = []
+                for f in next_fixtures[:5]:
+                    if f.get('team_h') == team_id:
+                        upcoming_difficulties.append(f.get('team_h_difficulty', 3))
+                    else:
+                        upcoming_difficulties.append(f.get('team_a_difficulty', 3))
+                
+                avg_difficulty = sum(upcoming_difficulties) / len(upcoming_difficulties) if upcoming_difficulties else None
+                
+                # Update team node with strength and fixture info
+                update_node = NodeApply(
+                    space=SPACE,
+                    external_id=f"team_{team_id}",
+                    sources=[
+                        NodeOrEdgeData(
+                            source={"space": SPACE, "externalId": "PLTeam", "version": VERSION, "type": "view"},
+                            properties={
+                                "teamId": team_id,
+                                "name": team['name'],
+                                "shortName": team['short_name'],
+                                "strength": team.get('strength'),
+                                "strengthOverallHome": team.get('strength_overall_home'),
+                                "strengthOverallAway": team.get('strength_overall_away'),
+                                "strengthAttackHome": team.get('strength_attack_home'),
+                                "strengthAttackAway": team.get('strength_attack_away'),
+                                "strengthDefenceHome": team.get('strength_defence_home'),
+                                "strengthDefenceAway": team.get('strength_defence_away'),
+                                "upcomingFixtureDifficulty": avg_difficulty,
+                                "nextFixture": {"space": SPACE, "externalId": f"fixture_{next_fixture_id}"} if next_fixture_id else None
+                            }
+                        )
+                    ]
+                )
+                client.data_modeling.instances.apply(nodes=[update_node], auto_create_direct_relations=True)
+            
+            print(f"  ✓ Updated team strength ratings")
+            
+        except Exception as e:
+            print(f"  ✗ Error loading fixtures: {e}")
+            stats["errors"].append(f"Fixtures: {str(e)}")
         
         # =====================================================================
         # STEP 3: Load Gameweeks
@@ -426,6 +599,87 @@ def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
         print(f"  ✓ Loaded {len(player_selection_nodes)} player selections")
         
         # =====================================================================
+        # STEP 6.5: Calculate Formations for Manager Teams
+        # =====================================================================
+        print("Calculating formations for manager teams...")
+        
+        # Build a lookup of player positions
+        player_positions = {f"player_{p['id']}": position_map.get(p['element_type']) for p in players}
+        
+        # Build formation data from player selections
+        formations_data = defaultdict(lambda: {"DEF": 0, "MID": 0, "FWD": 0, "active_chip": None})
+        
+        for idx, manager in enumerate(standings):
+            entry_id = manager['entry']
+            
+            try:
+                history = manager_histories.get(entry_id, {})
+                gameweeks = [gw['event'] for gw in history.get('current', [])]
+                
+                for gw in gameweeks:
+                    try:
+                        picks_data = fpl_client.get_entry_picks(entry_id, gw)
+                        picks = picks_data.get('picks', [])
+                        active_chip = picks_data.get('active_chip')
+                        
+                        # Skip if bench boost is active
+                        if active_chip == 'bboost':
+                            continue
+                        
+                        # Count starting 11 by position (position 1-11 are starters)
+                        position_counts = {"DEF": 0, "MID": 0, "FWD": 0}
+                        
+                        for pick in picks:
+                            if pick['position'] <= 11:  # Starting 11
+                                player_ext_id = f"player_{pick['element']}"
+                                pos = player_positions.get(player_ext_id)
+                                if pos in position_counts:
+                                    position_counts[pos] += 1
+                        
+                        # Format as formation string (e.g., "4-3-3")
+                        formation_str = f"{position_counts['DEF']}-{position_counts['MID']}-{position_counts['FWD']}"
+                        
+                        # Store for later update
+                        manager_team_ext_id = f"managerteam_{entry_id}_gw{gw}"
+                        formations_data[manager_team_ext_id] = {
+                            "formation": formation_str,
+                            "entry_id": entry_id,
+                            "gameweek": gw
+                        }
+                        
+                        time.sleep(0.2)  # Rate limiting
+                        
+                    except Exception as e:
+                        continue
+                
+            except Exception as e:
+                continue
+        
+        # Update manager team nodes with formations
+        formation_updates = []
+        for ext_id, data in formations_data.items():
+            formation_updates.append(NodeApply(
+                space=SPACE,
+                external_id=ext_id,
+                sources=[
+                    NodeOrEdgeData(
+                        source={"space": SPACE, "externalId": "ManagerTeam", "version": VERSION, "type": "view"},
+                        properties={
+                            "formation": data["formation"]
+                        }
+                    )
+                ]
+            ))
+        
+        # Apply formation updates in batches
+        for i in range(0, len(formation_updates), batch_size):
+            batch = formation_updates[i:i + batch_size]
+            client.data_modeling.instances.apply(nodes=batch, auto_create_direct_relations=True)
+        
+        stats["formations_calculated"] = len(formation_updates)
+        print(f"  ✓ Calculated formations for {len(formation_updates)} manager teams")
+        
+        # =====================================================================
         # STEP 7: Load Transfers (simplified - last 5 GWs only)
         # =====================================================================
         print("Analyzing transfers (last 5 gameweeks)...")
@@ -525,10 +779,11 @@ def handle(data: dict[str, Any], client: CogniteClient) -> dict[str, Any]:
         print(f"  ✓ Loaded {len(transfer_nodes)} transfers")
         
         print(f"\n✅ Data update complete!")
-        print(f"   Teams: {stats['teams']}, Gameweeks: {stats['gameweeks']}, Players: {stats['players']}")
+        print(f"   Teams: {stats['teams']}, Fixtures: {stats['fixtures']} ({stats['fixtures_with_odds']} with odds)")
+        print(f"   Gameweeks: {stats['gameweeks']}, Players: {stats['players']}")
         print(f"   Managers: {stats['managers']}, Performance: {stats['performance_records']}")
-        print(f"   Manager Teams: {stats['manager_teams']}, Player Selections: {stats['player_selections']}")
-        print(f"   Transfers: {stats['transfers']}")
+        print(f"   Manager Teams: {stats['manager_teams']} ({stats['formations_calculated']} with formations)")
+        print(f"   Player Selections: {stats['player_selections']}, Transfers: {stats['transfers']}")
         
         return {
             "status": "success",

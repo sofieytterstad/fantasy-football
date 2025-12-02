@@ -28,4 +28,59 @@ properties:
       list: false
     nullable: true
     description: Overall team strength
+  strengthOverallHome:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Overall Home
+    description: Overall team strength at home
+  strengthOverallAway:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Overall Away
+    description: Overall team strength away
+  strengthAttackHome:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Attack Home
+    description: Attacking strength at home
+  strengthAttackAway:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Attack Away
+    description: Attacking strength away
+  strengthDefenceHome:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Defence Home
+    description: Defensive strength at home
+  strengthDefenceAway:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    name: Strength Defence Away
+    description: Defensive strength away
+  upcomingFixtureDifficulty:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    name: Upcoming Fixture Difficulty
+    description: Average difficulty of next 5 fixtures (1-5 scale)
+  nextFixture:
+    type:
+      type: direct
+    nullable: true
+    name: Next Fixture
+    description: Next upcoming fixture for this team
 
